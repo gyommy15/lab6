@@ -6,3 +6,5 @@ before_install:
 
 notifications:
   email: false
+  
+warnings_are_errors: false
