@@ -1,3 +1,11 @@
+#' Brute force search for knapsack problem
+#'
+#' The only solution that is guaranteed to give a correct answer in all situations for the knapsack problem is using brute-force search, i.e. going through all possible alternatives and return the maximum value found.
+#' @param x is object that contains two vectors with weights and values. Must be a data frame with two colums w and v.
+#' @param W is the maximum capacity(weight) of the knapsack and should be a positive numeric number.
+#' @return A list with two elements, maximum value and seleted items each.
+#' @export
+
 # set.seed(42)
 # n <- 2000
 # knapsack_objects <-

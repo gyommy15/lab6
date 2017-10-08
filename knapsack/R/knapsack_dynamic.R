@@ -1,3 +1,11 @@
+#' Dynamic programming for knapsack problem
+#'
+#' If the weights are actually discrete values, we can use this to create an algorithm that can solve the knapsack problem exact by iterating over all possible values of w.
+#' @param x is object that contains two vectors with weights and values. Must be a data frame with two colums w and v.
+#' @param W is the maximum capacity(weight) of the knapsack and should be a positive numeric number.
+#' @return A list with two elements, maximum value and seleted items each.
+#' @export
+#' 
 # set.seed(42)
 # n <- 2000
 # knapsack_objects <-

@@ -1,3 +1,11 @@
+#' Greedy heuristic approach for knapsack problem
+#'
+#' This algorithm will not give an exact result (but it can be shown that it will return at least 50% of the true maximum value), but it will reduce the computational complexity considerably (actually to O(n log n) due to the sorting part of the algorithm).
+#' @param x is object that contains two vectors with weights and values. Must be a data frame with two colums w and v.
+#' @param W is the maximum capacity(weight) of the knapsack and should be a positive numeric number.
+#' @return A list with two elements, maximum value and seleted items each.
+#' @export
+
 # set.seed(42)
 # n <- 2000
 # knapsack_objects <-

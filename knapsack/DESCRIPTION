@@ -1,11 +1,12 @@
 Package: knapsack
 Type: Package
-Title: What the package does (short line)
+Title: This package contains 3 different approaches to solve knapsack problem
 Version: 1.0
 Date: 2017-10-06
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Author: Josh Hyungyum Kim
+Maintainer: Josh Hyungyum Kim <gyommy15@gmail.com>
+Description: Contains 3 different functions to solve knapsack problem. brute_force_knapsack, knapsack_dynamic, greedy_knapsack.
+License: MIT + file LICENSE
 RoxygenNote: 6.0.1
 Suggests: testthat
+LazyData: true
