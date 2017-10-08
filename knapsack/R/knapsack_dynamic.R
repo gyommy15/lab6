@@ -42,17 +42,13 @@ knapsack_dynamic <- function(x,W){
   while(i > 1 ){
     
     if( m[i-1,j] < m[i,j] ){
-      
       best_elements <- c(best_elements, i-1)
-      
       i <- i - 1
       j <- j - weights[i]
+      
     }else{
       i <- i - 1
     }
-    
   }
-
   return(list(value=max(m), elements=sort(best_elements)))
-
 }
