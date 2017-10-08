@@ -3,8 +3,11 @@
 #' The only solution that is guaranteed to give a correct answer in all situations for the knapsack problem is using brute-force search, i.e. going through all possible alternatives and return the maximum value found.
 #' @param x is object that contains two vectors with weights and values. Must be a data frame with two colums w and v.
 #' @param W is the maximum capacity(weight) of the knapsack and should be a positive numeric number.
+#' @param parallel is the logical 
 #' @return A list with two elements, maximum value and seleted items each.
 #' @export
+#' @importFrom utils combn
+#' @import parallel lineprof
 
 # set.seed(42)
 # n <- 2000
@@ -15,7 +18,7 @@
 #   )
 # brute_force_knapsack(x = knapsack_objects[1:8,], W = 3500)
 
-brute_force_knapsack <- function(x, W){
+brute_force_knapsack <- function(x, W, parallel = FALSE){
   
   #Check inputs are correct
   stopifnot(is.data.frame(x) & is.numeric(W) & W>0)
@@ -33,7 +36,7 @@ brute_force_knapsack <- function(x, W){
   #Generating a list with num_of_cases elements (initial value 0)
   cases <- as.list(numeric(num_of_cases))
   
-  
+  if(parallel == FALSE){
   for(i in 1:num_of_cases){
     #Binary coding for each case
     cases[[i]] <- as.numeric(intToBits(i)[1:(num_of_items)])
@@ -58,4 +61,45 @@ brute_force_knapsack <- function(x, W){
   elements <- (1:num_of_items)[cases[weight_check[best_case]][[1]]==1]
   
   return(list(value=value, elements=elements))
+  
+  }else{
+    
+    requireNamespace("parallel")
+    
+    #Getting cores // set to 2 to observe cran policy
+    cores <- parallel::detectCores()-2
+    
+    #Making cluster
+    cl <- makeCluster(cores)
+    
+    #Applying parLapplyLB
+    clusterExport(cl, c("x"), envir = environment())
+    cases_list <- parLapplyLB(cl, 1:num_of_items, fun =  function(y) {
+      combn(rownames(x), y, paste0, collapse = " ")
+      
+    })
+    weights_list <- parLapplyLB(cl, 1:num_of_items, fun =  function(y) {
+      combn(x$w, y, sum)
+      
+    })
+    values_list <- parLapplyLB(cl,1:num_of_items, fun =  function(y) { 
+      combn(x$v, y , sum)
+      
+    })
+    
+    stopCluster(cl)
+    
+    #Unlisting
+    cases_unlist <- unlist(cases_list)
+    weights_unlist <- unlist(weights_list)
+    values_unlist <- unlist(values_list)
+    
+    #Finding maximum value
+    value <- max(values_unlist[which(weights_unlist <= W)])
+    
+    #Finding best case
+    elements <- cases_unlist[which(values_unlist == value)]
+
+    return(list(value = value, elements = as.numeric(strsplit(elements, " ")[[1]])))
+  }
 }

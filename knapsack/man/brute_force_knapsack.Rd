@@ -4,12 +4,14 @@
 \alias{brute_force_knapsack}
 \title{Brute force search for knapsack problem}
 \usage{
-brute_force_knapsack(x, W)
+brute_force_knapsack(x, W, parallel = FALSE)
 }
 \arguments{
 \item{x}{is object that contains two vectors with weights and values. Must be a data frame with two colums w and v.}
 
 \item{W}{is the maximum capacity(weight) of the knapsack and should be a positive numeric number.}
+
+\item{parallel}{is the logical}
 }
 \value{
 A list with two elements, maximum value and seleted items each.

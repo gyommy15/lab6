@@ -17,6 +17,9 @@ knitr::opts_chunk$set(
 ```
 
 ```{r}
+#Basic setting
+library(knapsack)
+
 set.seed(42)
 n <- 2000
 knapsack_objects <-
@@ -25,3 +28,59 @@ knapsack_objects <-
    v=runif(n = n, 0, 10000))
 ```
 
+##brute_force_knapsack
+__Question__ How much time does it takes to run the algorithm for n = 16 objects?
+```{r}
+system.time({brute_force_knapsack(x = knapsack_objects[1:16,], W = 3500)})
+```
+Like in the test suit, we use the function system.time() to measure. The result above will be updated everytime this vignette updated.
+
+##knapsack_dynamic
+__Question__ How much time does it takes to run the algorithm for n = 500 objects?
+```{r}
+system.time({knapsack_dynamic(x = knapsack_objects[1:500,], W = 3500)})
+```
+Even though the n = 500, the time compared to the brute_force_knapsack is significantly decreased.
+
+##greedy_knapsack
+__Question__ How much time does it takes to run the algorithm for n = 1000000 objects?
+```{r}
+set.seed(42)
+n <- 1000000
+knapsack_objects <-
+ data.frame(
+   w=sample(1:4000, size = n, replace = TRUE),
+   v=runif(n = n, 0, 10000))
+
+system.time({greedy_knapsack(x = knapsack_objects[1:1000000,], W = 2000)})
+```
+This time n = 1000000. However, the time decreased even more dramatically. 
+
+##Profiling and optimizing the code
+###brute_force_knapsack
+```{r}
+require(lineprof)
+
+lineprof(bfk <- brute_force_knapsack(x = knapsack_objects[1:8,], W = 3500))
+```
+
+###knapsack_dynamic
+```{r}
+lineprof(kd <- knapsack_dynamic(x = knapsack_objects[1:20,], W = 3500))
+```
+
+###greedy_knapsack
+```{r}
+lineprof(gk <- greedy_knapsack(x = knapsack_objects[1:1000000,], W = 3500))
+```
+
+Based on the results above, we can conclude that for all the 3 functions, the main time consumption factor is the loop. (Though stopifnot(input checking part) increased a lot in greedy_knapsack due to the size of n.) We may apply several ways to improve and optimize like parallerize or Rcpp implementation and so forth. There  is not so many rooms to improve without these applications.
+
+##Parallelize brute force search
+__Question__ What performance gain could you get by parallelizing brute force search?
+```{r}
+system.time({brute_force_knapsack(x = knapsack_objects[1:16,], W = 3500)})
+
+system.time({brute_force_knapsack(x = knapsack_objects[1:16,], W = 3500, parallel = TRUE)})
+```
+According to the above results, user time decreased by 10% and elapsed time decreased by 50%.

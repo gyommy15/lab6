@@ -74,12 +74,143 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">42</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Basic setting</span>
+<span class="kw">library</span>(knapsack)
+
+<span class="kw">set.seed</span>(<span class="dv">42</span>)
 n &lt;-<span class="st"> </span><span class="dv">2000</span>
 knapsack_objects &lt;-
 <span class="st"> </span><span class="kw">data.frame</span>(
    <span class="dt">w=</span><span class="kw">sample</span>(<span class="dv">1</span>:<span class="dv">4000</span>, <span class="dt">size =</span> n, <span class="dt">replace =</span> <span class="ot">TRUE</span>),
    <span class="dt">v=</span><span class="kw">runif</span>(<span class="dt">n =</span> n, <span class="dv">0</span>, <span class="dv">10000</span>))</code></pre></div>
+<div id="brute_force_knapsack" class="section level2">
+<h2>brute_force_knapsack</h2>
+<p><strong>Question</strong> How much time does it takes to run the algorithm for n = 16 objects?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">system.time</span>({<span class="kw">brute_force_knapsack</span>(<span class="dt">x =</span> knapsack_objects[<span class="dv">1</span>:<span class="dv">16</span>,], <span class="dt">W =</span> <span class="dv">3500</span>)})
+<span class="co">#&gt;    user  system elapsed </span>
+<span class="co">#&gt;    4.80    0.00    4.93</span></code></pre></div>
+<p>Like in the test suit, we use the function system.time() to measure. The result above will be updated everytime this vignette updated.</p>
+</div>
+<div id="knapsack_dynamic" class="section level2">
+<h2>knapsack_dynamic</h2>
+<p><strong>Question</strong> How much time does it takes to run the algorithm for n = 500 objects?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">system.time</span>({<span class="kw">knapsack_dynamic</span>(<span class="dt">x =</span> knapsack_objects[<span class="dv">1</span>:<span class="dv">500</span>,], <span class="dt">W =</span> <span class="dv">3500</span>)})
+<span class="co">#&gt;    user  system elapsed </span>
+<span class="co">#&gt;    6.51    0.00    6.63</span></code></pre></div>
+<p>Even though the n = 500, the time compared to the brute_force_knapsack is significantly decreased.</p>
+</div>
+<div id="greedy_knapsack" class="section level2">
+<h2>greedy_knapsack</h2>
+<p><strong>Question</strong> How much time does it takes to run the algorithm for n = 1000000 objects?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">42</span>)
+n &lt;-<span class="st"> </span><span class="dv">1000000</span>
+knapsack_objects &lt;-
+<span class="st"> </span><span class="kw">data.frame</span>(
+   <span class="dt">w=</span><span class="kw">sample</span>(<span class="dv">1</span>:<span class="dv">4000</span>, <span class="dt">size =</span> n, <span class="dt">replace =</span> <span class="ot">TRUE</span>),
+   <span class="dt">v=</span><span class="kw">runif</span>(<span class="dt">n =</span> n, <span class="dv">0</span>, <span class="dv">10000</span>))
+
+<span class="kw">system.time</span>({<span class="kw">greedy_knapsack</span>(<span class="dt">x =</span> knapsack_objects[<span class="dv">1</span>:<span class="dv">1000000</span>,], <span class="dt">W =</span> <span class="dv">2000</span>)})
+<span class="co">#&gt;    user  system elapsed </span>
+<span class="co">#&gt;    0.24    0.05    0.28</span></code></pre></div>
+<p>This time n = 1000000. However, the time decreased even more dramatically.</p>
+</div>
+<div id="profiling-and-optimizing-the-code" class="section level2">
+<h2>Profiling and optimizing the code</h2>
+<div id="brute_force_knapsack-1" class="section level3">
+<h3>brute_force_knapsack</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">require</span>(lineprof)
+
+<span class="kw">lineprof</span>(bfk &lt;-<span class="st"> </span><span class="kw">brute_force_knapsack</span>(<span class="dt">x =</span> knapsack_objects[<span class="dv">1</span>:<span class="dv">8</span>,], <span class="dt">W =</span> <span class="dv">3500</span>))
+<span class="co">#&gt; Reducing depth to 2 (from 58)</span>
+<span class="co">#&gt;     time  alloc release dups                                   ref</span>
+<span class="co">#&gt; 1  0.042 16.785       0 7532 c(&quot;compiler:::tryCmpfun&quot;, &quot;tryCatch&quot;)</span>
+<span class="co">#&gt; 2  0.001  0.215       0   81       c(&quot;stopifnot&quot;, &quot;is.data.frame&quot;)</span>
+<span class="co">#&gt; 3  0.002  1.057       0  640                c(&quot;[&quot;, &quot;[.data.frame&quot;)</span>
+<span class="co">#&gt; 4  0.001  0.551       0  449                                   &quot;[&quot;</span>
+<span class="co">#&gt; 5  0.001  0.538       0  477                c(&quot;[&quot;, &quot;[.data.frame&quot;)</span>
+<span class="co">#&gt; 6  0.001  0.550       0  464                                   &quot;[&quot;</span>
+<span class="co">#&gt; 7  0.001  0.506       0  475                c(&quot;[&quot;, &quot;[.data.frame&quot;)</span>
+<span class="co">#&gt; 8  0.002  1.085       0  897                                   &quot;[&quot;</span>
+<span class="co">#&gt; 9  0.004  1.805       0 1673                c(&quot;[&quot;, &quot;[.data.frame&quot;)</span>
+<span class="co">#&gt; 10 0.001  0.497       0  360                          character(0)</span>
+<span class="co">#&gt; 11 0.003  0.864       0 1174                c(&quot;[&quot;, &quot;[.data.frame&quot;)</span>
+<span class="co">#&gt;                              src</span>
+<span class="co">#&gt; 1  compiler:::tryCmpfun/tryCatch</span>
+<span class="co">#&gt; 2  stopifnot/is.data.frame      </span>
+<span class="co">#&gt; 3  [/[.data.frame               </span>
+<span class="co">#&gt; 4  [                            </span>
+<span class="co">#&gt; 5  [/[.data.frame               </span>
+<span class="co">#&gt; 6  [                            </span>
+<span class="co">#&gt; 7  [/[.data.frame               </span>
+<span class="co">#&gt; 8  [                            </span>
+<span class="co">#&gt; 9  [/[.data.frame               </span>
+<span class="co">#&gt; 10                              </span>
+<span class="co">#&gt; 11 [/[.data.frame</span></code></pre></div>
+</div>
+<div id="knapsack_dynamic-1" class="section level3">
+<h3>knapsack_dynamic</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">lineprof</span>(kd &lt;-<span class="st"> </span><span class="kw">knapsack_dynamic</span>(<span class="dt">x =</span> knapsack_objects[<span class="dv">1</span>:<span class="dv">20</span>,], <span class="dt">W =</span> <span class="dv">3500</span>))
+<span class="co">#&gt; Reducing depth to 2 (from 67)</span>
+<span class="co">#&gt;     time  alloc release dups                                   ref</span>
+<span class="co">#&gt; 1  0.031 11.302       0 5584 c(&quot;compiler:::tryCmpfun&quot;, &quot;tryCatch&quot;)</span>
+<span class="co">#&gt; 2  0.002  0.647       0  120       c(&quot;stopifnot&quot;, &quot;is.data.frame&quot;)</span>
+<span class="co">#&gt; 3  0.004  1.588       0 2429                          character(0)</span>
+<span class="co">#&gt; 4  0.001  0.521       0  915                                 &quot;max&quot;</span>
+<span class="co">#&gt; 5  0.002  1.137       0 1924                          character(0)</span>
+<span class="co">#&gt; 6  0.002  1.250       0 3167                                 &quot;max&quot;</span>
+<span class="co">#&gt; 7  0.006  2.739       0 5625                          character(0)</span>
+<span class="co">#&gt; 8  0.001  0.701       0  952                                 &quot;max&quot;</span>
+<span class="co">#&gt; 9  0.002  0.684       0 1450                          character(0)</span>
+<span class="co">#&gt; 10 0.002  1.269       0 2946                                 &quot;max&quot;</span>
+<span class="co">#&gt; 11 0.002  0.483       0 2087                          character(0)</span>
+<span class="co">#&gt;                              src</span>
+<span class="co">#&gt; 1  compiler:::tryCmpfun/tryCatch</span>
+<span class="co">#&gt; 2  stopifnot/is.data.frame      </span>
+<span class="co">#&gt; 3                               </span>
+<span class="co">#&gt; 4  max                          </span>
+<span class="co">#&gt; 5                               </span>
+<span class="co">#&gt; 6  max                          </span>
+<span class="co">#&gt; 7                               </span>
+<span class="co">#&gt; 8  max                          </span>
+<span class="co">#&gt; 9                               </span>
+<span class="co">#&gt; 10 max                          </span>
+<span class="co">#&gt; 11</span></code></pre></div>
+</div>
+<div id="greedy_knapsack-1" class="section level3">
+<h3>greedy_knapsack</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">lineprof</span>(gk &lt;-<span class="st"> </span><span class="kw">greedy_knapsack</span>(<span class="dt">x =</span> knapsack_objects[<span class="dv">1</span>:<span class="dv">1000000</span>,], <span class="dt">W =</span> <span class="dv">3500</span>))
+<span class="co">#&gt; Reducing depth to 2 (from 52)</span>
+<span class="co">#&gt;    time alloc release dups                                   ref</span>
+<span class="co">#&gt; 1 0.018 7.229   0.000 3250 c(&quot;compiler:::tryCmpfun&quot;, &quot;tryCatch&quot;)</span>
+<span class="co">#&gt; 2 0.069 4.338   7.721   35       c(&quot;stopifnot&quot;, &quot;is.data.frame&quot;)</span>
+<span class="co">#&gt; 3 0.017 0.919   1.954   42                           &quot;stopifnot&quot;</span>
+<span class="co">#&gt; 4 0.001 0.964   0.000    6                 c(&quot;stopifnot&quot;, &quot;all&quot;)</span>
+<span class="co">#&gt; 5 0.006 0.489   0.000   12                          character(0)</span>
+<span class="co">#&gt; 6 0.081 0.053   0.000    5                               &quot;order&quot;</span>
+<span class="co">#&gt; 7 0.003 0.350   0.000    0                                   &quot;c&quot;</span>
+<span class="co">#&gt;                             src</span>
+<span class="co">#&gt; 1 compiler:::tryCmpfun/tryCatch</span>
+<span class="co">#&gt; 2 stopifnot/is.data.frame      </span>
+<span class="co">#&gt; 3 stopifnot                    </span>
+<span class="co">#&gt; 4 stopifnot/all                </span>
+<span class="co">#&gt; 5                              </span>
+<span class="co">#&gt; 6 order                        </span>
+<span class="co">#&gt; 7 c</span></code></pre></div>
+<p>Based on the results above, we can conclude that for all the 3 functions, the main time consumption factor is the loop. (Though stopifnot(input checking part) increased a lot in greedy_knapsack due to the size of n.) We may apply several ways to improve and optimize like parallerize or Rcpp implementation and so forth. There is not so many rooms to improve without these applications.</p>
+</div>
+</div>
+<div id="parallelize-brute-force-search" class="section level2">
+<h2>Parallelize brute force search</h2>
+<p><strong>Question</strong> What performance gain could you get by parallelizing brute force search?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">system.time</span>({<span class="kw">brute_force_knapsack</span>(<span class="dt">x =</span> knapsack_objects[<span class="dv">1</span>:<span class="dv">16</span>,], <span class="dt">W =</span> <span class="dv">3500</span>)})
+<span class="co">#&gt;    user  system elapsed </span>
+<span class="co">#&gt;    3.69    0.00    3.68</span>
+
+<span class="kw">system.time</span>({<span class="kw">brute_force_knapsack</span>(<span class="dt">x =</span> knapsack_objects[<span class="dv">1</span>:<span class="dv">16</span>,], <span class="dt">W =</span> <span class="dv">3500</span>, <span class="dt">parallel =</span> <span class="ot">TRUE</span>)})
+<span class="co">#&gt;    user  system elapsed </span>
+<span class="co">#&gt;    0.14    0.19    1.67</span></code></pre></div>
+<p>According to the above results, user time decreased by 10% and elapsed time decreased by 50%.</p>
+</div>
 
 
 
