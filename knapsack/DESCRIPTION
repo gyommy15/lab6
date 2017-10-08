@@ -8,5 +8,6 @@ Maintainer: Josh Hyungyum Kim <gyommy15@gmail.com>
 Description: Contains 3 different functions to solve knapsack problem. brute_force_knapsack, knapsack_dynamic, greedy_knapsack.
 License: MIT + file LICENSE
 RoxygenNote: 6.0.1
-Suggests: testthat
+Suggests: knitr, rmarkdown, testthat
+VignetteBuilder: knitr
 LazyData: true
